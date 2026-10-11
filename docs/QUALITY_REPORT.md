@@ -9,15 +9,17 @@ This report documents the automated quality, accessibility, performance, and sec
 | Audit Domain | Target / Standard | Achieved Metric | Status |
 | :--- | :--- | :--- | :--- |
 | **Domain Engine Code Coverage** | $\ge 90\%$ lines / branches | **99.32%** Lines / **96.42%** Branches | **PASSED** (Exceeds Target) |
-| **Global Code Coverage** | $\ge 80\%$ lines | **91.87%** Lines / **80.14%** Branches | **PASSED** (Exceeds Target) |
-| **Vitest Unit & Property Tests** | 100% passing | **113 / 113 Tests Passing** | **PASSED** |
+| **Domain Engine Sub-systems** | $\ge 90\%$ lines | **97.31%** Lines / **88.35%** Branches | **PASSED** (Exceeds Target) |
+| **Global Code Coverage** | $\ge 80\%$ lines | **91.12%** Lines / **80.5%** Branches | **PASSED** (Exceeds Target) |
+| **Vitest Unit, Property & Security Tests** | 100% passing | **129 / 129 Tests Passing (27 Suites)** | **PASSED** |
 | **Playwright E2E Tests** | 100% passing (Desktop + Mobile) | **22 / 22 Tests Passing** | **PASSED** |
-| **Automated Axe A11y Violations** | 0 violations (WCAG 2.2 AA) | **0 Violations across all 7 routes** | **PASSED** |
+| **Playwright Axe A11y Suite** | 0 violations (WCAG 2.2 AA) | **14 / 14 Suites (0 Violations)** | **PASSED** |
 | **Design Token Color Contrast** | $\ge 4.5:1$ text / $\ge 3:1$ UI | **18 / 18 token pairs verified** | **PASSED** |
 | **Next.js Production Build** | Zero type errors / warnings | **Exit Code 0 (10 Static Prerendered Pages)** | **PASSED** |
 | **Initial Shared JS Bundle** | $\le 150\text{ KB}$ gzipped | **103 KB** gzipped | **PASSED** |
 | **Cumulative Layout Shift (CLS)** | $< 0.10$ | **0.00** (Zero layout shift) | **PASSED** |
 | **Interaction to Next Paint (INP)** | $< 200\text{ ms}$ | **< 50 ms** (Custom SVG DOM, no chart lib) | **PASSED** |
+| **Specification Traceability** | 100% verified paths | **69 / 69 verified on disk** | **PASSED** |
 
 ---
 

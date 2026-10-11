@@ -14,34 +14,43 @@ describe("PlansView Component (Commitments, Subscriptions, Goals)", () => {
     const user = userEvent.setup();
     render(<PlansView />);
 
-    // Switch to subscriptions tab
     const subsTab = screen.getByRole("tab", { name: /Subscriptions/i });
     await user.click(subsTab);
 
-    // Find a subscription switch
     const switches = screen.getAllByRole("switch");
     expect(switches.length).toBeGreaterThan(0);
 
     const firstSwitch = switches[0]!;
     const initialChecked = firstSwitch.getAttribute("aria-checked") === "true";
 
-    // Toggle subscription
     await user.click(firstSwitch);
 
-    // Verify status flipped in store
     const updatedSub = useFinanceStore.getState().state.subscriptions[0];
     expect(updatedSub?.active).toBe(!initialChecked);
+  });
+
+  it("renders commitments tab and toggles early payment on a commitment", async () => {
+    const user = userEvent.setup();
+    render(<PlansView />);
+
+    const comTab = screen.getByRole("tab", { name: /Commitments/i });
+    await user.click(comTab);
+
+    expect(screen.getByText(/Fixed Obligations/i)).toBeDefined();
+
+    const payEarlyBtn = screen.getAllByRole("button", { name: /Pay Early/i })[0]!;
+    await user.click(payEarlyBtn);
+
+    expect(screen.getByText(/Revert Early Pay/i)).toBeDefined();
   });
 
   it("renders goals tab and handles 'What if I skip a coffee' nudge", async () => {
     const user = userEvent.setup();
     render(<PlansView />);
 
-    // Switch to goals tab
     const goalsTab = screen.getByRole("tab", { name: /Goals/i });
     await user.click(goalsTab);
 
-    // Click Skip a Coffee nudge
     const coffeeNudgeBtn = screen.getByRole("button", { name: /Skip Coffee/i });
     const initialTransfers = useFinanceStore.getState().state.transfers.length;
 

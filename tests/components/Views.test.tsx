@@ -56,6 +56,22 @@ describe("Core Views and Layout Components Rendering", () => {
     expect(screen.getByText(/Reset Demo \(Day 8\)/i)).toBeDefined();
   });
 
+  it("handles SettingsView simulation controls: Fast forward to Day 30 and Start Fresh", () => {
+    render(<SettingsView />);
+
+    // Fast forward to day 30
+    const ffBtn = screen.getByText(/Jump to Day 30/i);
+    fireEvent.click(ffBtn);
+    expect(useFinanceStore.getState().state.meta.currentDay).toBe(30);
+    expect(screen.getByText(/Month 30 Survival Scorecard/i)).toBeDefined();
+
+    // Start fresh
+    const freshBtn = screen.getByText(/Start Fresh/i);
+    fireEvent.click(freshBtn);
+    expect(useFinanceStore.getState().state.meta.currentDay).toBe(1);
+    expect(useFinanceStore.getState().state.expenses.length).toBe(0);
+  });
+
   it("renders layout shell, ImpactBar, Sidebar, and BottomTabBar", () => {
     render(
       <AppShell>

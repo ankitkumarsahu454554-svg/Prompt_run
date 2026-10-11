@@ -2,7 +2,7 @@ import { Skeleton } from "../components/feedback/Skeleton";
 
 export default function Loading() {
   return (
-    <div className="space-y-6 p-4 max-w-5xl mx-auto" aria-busy="true" aria-label="Loading application state">
+    <div role="status" className="space-y-6 p-4 max-w-5xl mx-auto" aria-busy="true" aria-label="Loading application state">
       {/* Top Banner Skeleton */}
       <Skeleton className="h-14 w-full rounded-card" />
 

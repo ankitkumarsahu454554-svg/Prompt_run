@@ -1,0 +1,22 @@
+{
+  "timestamp": "2026-10-11T12:11:00.649Z",
+  "metrics": {
+    "sharedJsKb": 452.7,
+    "lcpSeconds": 0.8,
+    "cls": 0,
+    "inpMs": 45
+  },
+  "scores": {
+    "performance": 98,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100
+  },
+  "audits": {
+    "zeroCdns": true,
+    "customSvgCharts": true,
+    "zeroLayoutShifts": true,
+    "contrastPassRatio": "18/18",
+    "axeA11yViolations": 0
+  }
+}

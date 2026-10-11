@@ -3,16 +3,18 @@
 ## 1. Threat Model Overview
 "Broke But Functional" operates as an entirely client-side, zero-backend personal financial intelligence dashboard. All financial calculations, state persistence, simulation projections, and user inputs are processed strictly on-device.
 
-### Primary Threat Vectors & Mitigations
-
-| Threat Vector | Potential Impact | Architecture Mitigation |
-| :--- | :--- | :--- |
-| **Cross-Site Scripting (XSS)** | Injection of malicious scripts via expense notes, goal titles, or imported data. | Multi-tier defense: (1) `sanitizeText()` Unicode NFKC normalization, HTML tag stripping, and bidi override stripping; (2) React text node rendering only (zero `dangerouslySetInnerHTML`); (3) Strict Content-Security-Policy. |
-| **Prototype Pollution** | Hijacking `__proto__`, `constructor`, or `prototype` via imported JSON backups. | Explicit key-by-key prototype pollution sanitizer in `sanitizeJson()` before parsing, plus strict Zod schema validation (`.strict()`). |
-| **Denial of Service / Storage Exhaustion** | Storage bombardment through massive payloads or infinite expense lists. | Hard 100KB limit on imported JSON strings, bounded collection size caps (≤200 expenses, ≤20 goals), and strict string truncation caps. |
-| **Float Precision Exploitation** | Rounding vulnerabilities or invalid monetary amounts (NaN, Infinity, exponent notation). | Branded integer `Paise` type. String parsing strictly regex-gated `/^\d{1,7}(\.\d{1,2})?$/`, rejecting negative amounts, zero amounts, exponents, and NaN. |
-| **Clickjacking & Frame Embedding** | Interface redressing attacks to manipulate user financial decisions. | `X-Frame-Options: DENY` and CSP `frame-ancestors 'none'`. |
-| **Data Leakage & Telemetry Exfiltration** | Unintended transmission of sensitive balance or financial health metrics. | Zero external APIs, zero third-party CDNs, zero remote tracking scripts, local woff2/system typography, `connect-src 'self'`. |
+### Primary Threat Vectors, Mitigations & Verification
+ 
+| Threat | Mitigation | Implementation File | Automated Test |
+| :--- | :--- | :--- | :--- |
+| **Cross-Site Scripting (XSS)** via notes, descriptions, or names | Multi-tier defense: (1) `sanitizeText()` Unicode NFKC normalization, strip all HTML tags (`/<[^>]*>/g`); (2) React text node rendering only (zero `dangerouslySetInnerHTML`); (3) Strict CSP. | `src/lib/sanitize.ts`<br>`src/app/layout.tsx` | `tests/security.test.ts`<br>`tests/lib/sanitize.test.ts` |
+| **Bidirectional (Bidi) Text Override** visual spoofing | Strips all bidirectional override control characters (`\u202A`–`\u202E`, `\u2066`–`\u2069`) to prevent financial figure reordering in UI. | `src/lib/sanitize.ts` | `tests/security.test.ts`<br>`tests/lib/sanitize.test.ts` |
+| **Prototype Pollution** via imported JSON backups | String-level and key-level rejection of `__proto__`, `constructor`, `prototype` before JSON parsing, backed by strict Zod schema validation (`.strict()`). | `src/store/persistence.ts` | `tests/security.test.ts`<br>`tests/store/persistence.test.ts` |
+| **Denial of Service & Storage Exhaustion** | Strict 100KB payload limit on imported JSON strings, bounded collection size caps (≤200 expenses, ≤20 goals), and input length truncation (≤40 / ≤120 chars). | `src/lib/sanitize.ts`<br>`src/store/persistence.ts` | `tests/security.test.ts`<br>`tests/store/persistence.test.ts` |
+| **Floating-Point Precision & Monetary Tampering** | Branded integer `Paise` type prevents floating point drift. String parsing strictly regex-gated `/^\d{1,7}(\.\d{1,2})?$/`, rejecting negative amounts, zero amounts, exponents (`1e6`), and `NaN`. | `src/domain/money.ts`<br>`src/lib/sanitize.ts` | `tests/domain/money.test.ts`<br>`tests/security.test.ts` |
+| **Corrupted or Tampered LocalStorage** | Automatic schema validation via Zod; invalid structure triggers automatic safe rollback to calibrated seed state without unhandled runtime crash. | `src/store/persistence.ts`<br>`src/lib/schemas.ts` | `tests/store/persistence.test.ts`<br>`e2e/storage-recovery.spec.ts` |
+| **Clickjacking & UI Redressing** | HTTP response headers configure `X-Frame-Options: DENY` and CSP `frame-ancestors 'none'` to block embedding into external iframes. | `next.config.ts` | `tests/security.test.ts` |
+| **Data Leakage & Telemetry Exfiltration** | Zero external API calls, zero remote fonts/CDNs, zero client telemetry, CSP `connect-src 'self'`. All data stored strictly on-device in browser `localStorage`. | `next.config.ts`<br>`src/store/persistence.ts` | `tests/security.test.ts`<br>`scripts/run-lighthouse.mjs` |
 
 ---
 

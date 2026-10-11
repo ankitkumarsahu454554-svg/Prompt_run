@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { Plus } from "lucide-react";
-import { CATEGORIES } from "../../domain/constants";
 import { asPaise } from "../../domain/money";
 import type { ExpenseCategory } from "../../domain/types";
 import { formatPaise } from "../../lib/format";
@@ -10,15 +9,9 @@ import { parseAmount, sanitizeText } from "../../lib/sanitize";
 import { calculateDailyAllowance } from "../../domain/engine/allowance";
 import { useFinanceStore } from "../../store/financeStore";
 import { Button } from "../../components/ui/Button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../../components/ui/Dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../../components/ui/Dialog";
 import { Input } from "../../components/ui/Input";
+import { CategoryRadioGroup } from "./components/CategoryRadioGroup";
 
 export interface AddExpenseModalProps {
   open?: boolean;
@@ -43,10 +36,7 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
   const [note, setNote] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
 
-  // Current allowance
   const currentAllowance = calculateDailyAllowance(state).dailyAllowance;
-
-  // Live preview allowance calculation
   const parsedAmount = parseAmount(amountInput);
   let previewAllowance = currentAllowance;
   let allowanceDelta = 0;
@@ -56,14 +46,7 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
       ...state,
       expenses: [
         ...state.expenses,
-        {
-          id: "temp",
-          amount: parsedAmount,
-          category,
-          day: state.meta.currentDay,
-          note: "",
-          source: "manual" as const,
-        },
+        { id: "temp", amount: parsedAmount, category, day: state.meta.currentDay, note: "", source: "manual" as const },
       ],
     };
     previewAllowance = calculateDailyAllowance(virtualState).dailyAllowance;
@@ -73,7 +56,6 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-
     const amountPaise = parseAmount(amountInput);
     if (!amountPaise) {
       setError("Please enter a valid amount in Rupees (e.g. 150 or 250.50).");
@@ -88,7 +70,6 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
       source: "manual",
     });
 
-    // Reset and close
     setAmountInput("");
     setNote("");
     setCategory("Food");
@@ -121,15 +102,10 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5 text-left">
-          {/* Amount input */}
           <div className="space-y-1.5">
-            <label htmlFor="expense-amount" className="block text-sm font-medium text-text">
-              Amount (₹)
-            </label>
+            <label htmlFor="expense-amount" className="block text-sm font-medium text-text">Amount (₹)</label>
             <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted font-heading font-semibold text-lg select-none" aria-hidden="true">
-                ₹
-              </span>
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted font-heading font-semibold text-lg select-none" aria-hidden="true">₹</span>
               <input
                 id="expense-amount"
                 type="text"
@@ -146,86 +122,26 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
                 aria-invalid={error ? "true" : undefined}
               />
             </div>
-            {error && (
-              <p id="expense-amount-error" role="alert" className="text-xs font-semibold text-danger">
-                {error}
-              </p>
-            )}
+            {error && <p id="expense-amount-error" role="alert" className="text-xs font-semibold text-danger">{error}</p>}
           </div>
 
-          {/* Live allowance impact preview */}
           {parsedAmount && parsedAmount > 0 && (
-            <div
-              id="allowance-preview"
-              aria-live="polite"
-              className="p-3 rounded-input bg-elevated/70 border border-border text-xs flex items-center justify-between"
-            >
+            <div id="allowance-preview" aria-live="polite" className="p-3 rounded-input bg-elevated/70 border border-border text-xs flex items-center justify-between">
               <span className="text-muted">Daily allowance after this:</span>
               <div className="flex items-center gap-1.5">
-                <span className="font-bold text-text tabular-nums">
-                  {formatPaise(previewAllowance)}/day
-                </span>
-                <span className="text-danger font-semibold tabular-nums">
-                  (▼ {formatPaise(asPaise(Math.abs(allowanceDelta)))})
-                </span>
+                <span className="font-bold text-text tabular-nums">{formatPaise(previewAllowance)}/day</span>
+                <span className="text-danger font-semibold tabular-nums">(▼ {formatPaise(asPaise(Math.abs(allowanceDelta)))})</span>
               </div>
             </div>
           )}
 
-          {/* Category selection (Radio Group) */}
-          <div className="space-y-2">
-            <span className="block text-sm font-medium text-text" id="category-label">
-              Category
-            </span>
-            <div
-              role="radiogroup"
-              aria-labelledby="category-label"
-              className="grid grid-cols-3 sm:grid-cols-4 gap-2"
-            >
-              {CATEGORIES.map((cat) => {
-                const isSelected = category === cat;
-                return (
-                  <button
-                    key={cat}
-                    type="button"
-                    role="radio"
-                    aria-checked={isSelected}
-                    onClick={() => setCategory(cat)}
-                    className={`min-h-[44px] px-3 py-2 rounded-input text-xs font-medium border transition-colors flex items-center justify-center select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-text ${
-                      isSelected
-                        ? "bg-primary text-white border-primary shadow-xs font-semibold"
-                        : "bg-elevated text-muted border-border hover:text-text hover:bg-surface"
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          <CategoryRadioGroup category={category} setCategory={setCategory} />
 
-          {/* Note Input */}
-          <Input
-            label="Note (Optional)"
-            placeholder="e.g. Chai at tapri, Swiggy biryani"
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            maxLength={120}
-            hint="Max 120 characters"
-          />
+          <Input label="Note (Optional)" placeholder="e.g. Chai at tapri, Swiggy biryani" value={note} onChange={(e) => setNote(e.target.value)} maxLength={120} hint="Max 120 characters" />
 
-          {/* Submit & Cancel */}
           <div className="pt-2 flex items-center justify-end gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" variant="primary" className="px-6">
-              Add Expense
-            </Button>
+            <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
+            <Button type="submit" variant="primary" className="px-6">Add Expense</Button>
           </div>
         </form>
       </DialogContent>
