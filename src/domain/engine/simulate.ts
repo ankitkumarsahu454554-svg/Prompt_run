@@ -57,11 +57,11 @@ export function simulateDecision(
   const currentDay = inputState.meta.currentDay;
   const decisionDay = decision.day ?? currentDay;
 
-  // Construct simulated future state
-  const nextState: FinanceState = deepClone(inputState);
-
   let monthlyCost: Paise | undefined;
   let annualizedCost: Paise | undefined;
+
+  const newExpenses: Expense[] = [...inputState.expenses];
+  const newSubs: Subscription[] = [...inputState.subscriptions];
 
   if (decision.recurrence === "once") {
     const simExpense: Expense = {
@@ -72,13 +72,13 @@ export function simulateDecision(
       note: decision.name,
       source: "simulated",
     };
-    nextState.expenses.push(simExpense);
+    newExpenses.push(simExpense);
   } else if (decision.recurrence === "weekly") {
     monthlyCost = multiplyPaise(decision.amount, 4);
     annualizedCost = multiplyPaise(decision.amount, 52);
 
-    for (let d = decisionDay; d <= nextState.config.totalDays; d += 7) {
-      nextState.expenses.push({
+    for (let d = decisionDay; d <= inputState.config.totalDays; d += 7) {
+      newExpenses.push({
         id: `sim-exp-wk-${d}`,
         amount: decision.amount,
         category: "Fun",
@@ -98,8 +98,14 @@ export function simulateDecision(
       renewalDay: decisionDay,
       active: true,
     };
-    nextState.subscriptions.push(simSub);
+    newSubs.push(simSub);
   }
+
+  const nextState: FinanceState = {
+    ...inputState,
+    expenses: newExpenses,
+    subscriptions: newSubs,
+  };
 
   const after = getSnapshot(nextState);
 

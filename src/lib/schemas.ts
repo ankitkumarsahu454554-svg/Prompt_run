@@ -4,30 +4,24 @@
  */
 
 import { z } from "zod";
-import { asPaise, type Paise } from "../domain/money";
+import { asPaise } from "../domain/money";
 import { MAX_LABEL_LENGTH, MAX_NOTE_LENGTH, sanitizeText } from "./sanitize";
 
-// Branded Paise Zod schema with integer validation
-export const paiseSchema = z
-  .number()
-  .int()
-  .transform((val) => asPaise(val));
-
-export const nonNegativePaiseSchema = z
+const nonNegativePaiseSchema = z
   .number()
   .int()
   .min(0, "Amount cannot be negative")
   .max(100_000_000, "Amount exceeds ₹10,00,000 ceiling")
   .transform((val) => asPaise(val));
 
-export const signedPaiseSchema = z
+const signedPaiseSchema = z
   .number()
   .int()
   .min(-100_000_000)
   .max(100_000_000)
   .transform((val) => asPaise(val));
 
-export const expenseCategorySchema = z.enum([
+const expenseCategorySchema = z.enum([
   "Food",
   "Transport",
   "Rent",
@@ -37,28 +31,28 @@ export const expenseCategorySchema = z.enum([
   "Other",
 ]);
 
-export const expenseSourceSchema = z.enum([
+const expenseSourceSchema = z.enum([
   "manual",
   "event",
   "installment",
   "simulated",
 ]);
 
-export const incomeRecurrenceSchema = z.enum(["once", "weekly"]);
+const incomeRecurrenceSchema = z.enum(["once", "weekly"]);
 
-export const sanitizedString = (maxLen: number) =>
+const sanitizedString = (maxLen: number) =>
   z
     .string()
     .transform((val) => sanitizeText(val, maxLen))
     .refine((val) => val.length > 0, "Field cannot be empty");
 
-export const sanitizedOptionalString = (maxLen: number) =>
+const sanitizedOptionalString = (maxLen: number) =>
   z
     .string()
     .optional()
     .transform((val) => (val ? sanitizeText(val, maxLen) : ""));
 
-export const incomeSchema = z
+const incomeSchema = z
   .object({
     id: z.string().min(1).max(50),
     label: sanitizedString(MAX_LABEL_LENGTH),
@@ -68,7 +62,7 @@ export const incomeSchema = z
   })
   .strict();
 
-export const expenseSchema = z
+const expenseSchema = z
   .object({
     id: z.string().min(1).max(50),
     amount: nonNegativePaiseSchema,
@@ -79,7 +73,7 @@ export const expenseSchema = z
   })
   .strict();
 
-export const commitmentSchema = z
+const commitmentSchema = z
   .object({
     id: z.string().min(1).max(50),
     label: sanitizedString(MAX_LABEL_LENGTH),
@@ -89,7 +83,7 @@ export const commitmentSchema = z
   })
   .strict();
 
-export const subscriptionSchema = z
+const subscriptionSchema = z
   .object({
     id: z.string().min(1).max(50),
     name: sanitizedString(MAX_LABEL_LENGTH),
@@ -99,7 +93,7 @@ export const subscriptionSchema = z
   })
   .strict();
 
-export const goalSchema = z
+const goalSchema = z
   .object({
     id: z.string().min(1).max(50),
     name: sanitizedString(MAX_LABEL_LENGTH),
@@ -110,7 +104,7 @@ export const goalSchema = z
   })
   .strict();
 
-export const transferSchema = z
+const transferSchema = z
   .object({
     id: z.string().min(1).max(50),
     goalId: z.string().min(1).max(50),
@@ -119,14 +113,14 @@ export const transferSchema = z
   })
   .strict();
 
-export const eventResolutionChoiceSchema = z.enum([
+const eventResolutionChoiceSchema = z.enum([
   "pay_now",
   "split_installments",
   "borrow_goal",
   "skip",
 ]);
 
-export const unexpectedEventSchema = z
+const unexpectedEventSchema = z
   .object({
     id: z.string().min(1).max(50),
     title: sanitizedString(MAX_LABEL_LENGTH),
@@ -138,14 +132,14 @@ export const unexpectedEventSchema = z
   })
   .strict();
 
-export const configSchema = z
+const configSchema = z
   .object({
     startBalance: nonNegativePaiseSchema,
     totalDays: z.number().int().min(1).max(30),
   })
   .strict();
 
-export const metaSchema = z
+const metaSchema = z
   .object({
     onboarded: z.boolean(),
     rngSeed: z.number().int(),

@@ -29,9 +29,13 @@ export interface FinanceStoreState {
   previousState: FinanceState | null;
   lastRipple: RippleToastData | null;
   isHydrated: boolean;
+  isAddExpenseOpen: boolean;
+  selectedEventId: string | null;
 
   // Actions
   hydrate: () => void;
+  setAddExpenseOpen: (open: boolean) => void;
+  setSelectedEventId: (id: string | null) => void;
   addExpense: (expense: Omit<Expense, "id">) => void;
   addIncome: (income: Omit<Income, "id">) => void;
   addCommitment: (commitment: Omit<Commitment, "id">) => void;

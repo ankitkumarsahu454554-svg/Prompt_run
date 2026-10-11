@@ -8,6 +8,7 @@ import {
   CalendarCheck,
   ChevronRight,
   FastForward,
+  History,
   Home,
   Settings,
   Sparkles,
@@ -20,6 +21,7 @@ import { Button } from "../ui/Button";
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: Home },
   { href: "/simulate", label: "Decision Simulator", icon: Sparkles },
+  { href: "/timemachine", label: "Time Machine", icon: History },
   { href: "/plans", label: "Plans & Goals", icon: CalendarCheck },
   { href: "/forecast", label: "Forecast & Risk", icon: TrendingUp },
   { href: "/insights", label: "Health & Insights", icon: BarChart3 },

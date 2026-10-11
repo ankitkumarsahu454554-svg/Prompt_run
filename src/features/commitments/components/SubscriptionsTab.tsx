@@ -12,7 +12,7 @@ import { formatPaise } from "../../../lib/format";
 import { parseAmount, sanitizeText } from "../../../lib/sanitize";
 
 interface SubscriptionsTabProps {
-  subscriptions: Subscription[];
+  subscriptions: readonly Subscription[];
   analytics: SubscriptionAnalytics;
   onToggleSubscription: (id: string) => void;
   onAddSubscription: (sub: Omit<Subscription, "id">) => void;

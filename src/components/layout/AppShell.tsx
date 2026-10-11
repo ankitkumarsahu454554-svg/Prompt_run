@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import dynamic from "next/dynamic";
 import { useFinanceStore } from "../../store/financeStore";
 import { RippleToast } from "../feedback/RippleToast";
 import { Skeleton } from "../feedback/Skeleton";
@@ -9,6 +10,16 @@ import { ImpactBar } from "./ImpactBar";
 import { Sidebar } from "./Sidebar";
 import { SkipLink } from "./SkipLink";
 
+const AddExpenseModal = dynamic(
+  () => import("../../features/expenses/AddExpenseModal").then((mod) => mod.AddExpenseModal),
+  { ssr: false }
+);
+
+const UnexpectedEventModal = dynamic(
+  () => import("../../features/events/UnexpectedEventModal").then((mod) => mod.UnexpectedEventModal),
+  { ssr: false }
+);
+
 export interface AppShellProps {
   children: React.ReactNode;
 }
@@ -16,6 +27,10 @@ export interface AppShellProps {
 export const AppShell: React.FC<AppShellProps> = ({ children }) => {
   const hydrate = useFinanceStore((s) => s.hydrate);
   const isHydrated = useFinanceStore((s) => s.isHydrated);
+  const isAddExpenseOpen = useFinanceStore((s) => s.isAddExpenseOpen);
+  const setAddExpenseOpen = useFinanceStore((s) => s.setAddExpenseOpen);
+  const selectedEventId = useFinanceStore((s) => s.selectedEventId);
+  const setSelectedEventId = useFinanceStore((s) => s.setSelectedEventId);
 
   React.useEffect(() => {
     hydrate();
@@ -54,6 +69,20 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
 
       {/* Global RippleToast for mutations & undo */}
       <RippleToast />
+
+      {/* Dynamic Global Overlays */}
+      {isAddExpenseOpen && (
+        <AddExpenseModal open={isAddExpenseOpen} onOpenChange={setAddExpenseOpen} />
+      )}
+      {selectedEventId && (
+        <UnexpectedEventModal
+          eventId={selectedEventId}
+          open={Boolean(selectedEventId)}
+          onOpenChange={(open) => {
+            if (!open) setSelectedEventId(null);
+          }}
+        />
+      )}
     </div>
   );
 };

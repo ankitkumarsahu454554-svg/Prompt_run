@@ -17,7 +17,7 @@ const HTML_TAGS_REGEX = /<[^>]*>/g;
 
 export const MAX_LABEL_LENGTH = 40;
 export const MAX_NOTE_LENGTH = 120;
-export const MAX_ALLOWED_AMOUNT_PAISE = 100_000_000; // ₹10,00,000 (10 lakh)
+const MAX_ALLOWED_AMOUNT_PAISE = 100_000_000; // ₹10,00,000 (10 lakh)
 
 /**
  * Sanitizes user input text strictly:

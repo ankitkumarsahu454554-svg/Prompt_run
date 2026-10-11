@@ -40,6 +40,7 @@ export function rupeesToPaise(rupees: number): Paise {
 export function paiseToRupees(paise: Paise): number {
   return paise / 100;
 }
+export const toRupees = paiseToRupees;
 
 /**
  * Adds two Paise amounts.
@@ -54,6 +55,7 @@ export function addPaise(a: Paise, b: Paise): Paise {
 export function subPaise(a: Paise, b: Paise): Paise {
   return asPaise(a - b);
 }
+export const subtractPaise = subPaise;
 
 /**
  * Multiplies Paise by a numeric scalar and rounds to the nearest integer.

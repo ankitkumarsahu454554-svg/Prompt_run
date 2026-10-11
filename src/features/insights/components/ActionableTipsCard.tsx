@@ -5,7 +5,7 @@ import { Lightbulb, Sparkles } from "lucide-react";
 import { Card } from "../../../components/ui/Card";
 
 interface ActionableTipsCardProps {
-  tips: string[];
+  tips: readonly string[];
 }
 
 export const ActionableTipsCard: React.FC<ActionableTipsCardProps> = ({ tips }) => {

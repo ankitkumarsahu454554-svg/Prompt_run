@@ -19,7 +19,7 @@ import {
 } from "./stateTransitions";
 import type { FinanceStoreState, RippleToastData } from "./types";
 
-export type { FinanceStoreState, RippleToastData };
+export type { FinanceStoreState };
 
 export const useFinanceStore = create<FinanceStoreState>((set, get) => {
   function applyStateWithRipple(
@@ -59,6 +59,8 @@ export const useFinanceStore = create<FinanceStoreState>((set, get) => {
     previousState: null,
     lastRipple: null,
     isHydrated: false,
+    isAddExpenseOpen: false,
+    selectedEventId: null,
 
     hydrate: () => {
       if (typeof window === "undefined" || get().isHydrated) return;
@@ -66,6 +68,9 @@ export const useFinanceStore = create<FinanceStoreState>((set, get) => {
       const { state } = validateAndHydrateState(raw);
       set({ state, isHydrated: true });
     },
+
+    setAddExpenseOpen: (open) => set({ isAddExpenseOpen: open }),
+    setSelectedEventId: (id) => set({ selectedEventId: id }),
 
     addExpense: (expenseData) => {
       applyStateWithRipple(`Added ${expenseData.category} expense`, (curr) => ({

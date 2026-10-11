@@ -1,9 +1,32 @@
 /**
  * @file types.ts
  * Core domain types and interfaces for Broke But Functional.
+ * Pure domain layer: all types strictly readonly, branded primitives,
+ * discriminated unions, and a lightweight Result container.
  */
 
 import type { Paise } from "./money";
+
+// Branded Day type (1..30)
+export type Day = number & { readonly __brand: unique symbol };
+export const asDay = (d: number): Day => Math.max(1, Math.min(30, Math.floor(d))) as Day;
+
+// Branded GoalId
+export type GoalId = string & { readonly __brand: unique symbol };
+export const asGoalId = (id: string): GoalId => id as GoalId;
+
+// Result type for fallible domain operations
+export type Result<T, E = string> =
+  | { readonly ok: true; readonly value: T }
+  | { readonly ok: false; readonly error: E };
+
+export const ok = <T>(value: T): Result<T, never> => ({ ok: true, value });
+export const err = <E>(error: E): Result<never, E> => ({ ok: false, error });
+
+// Exhaustive switch helper
+export function assertNever(x: never, message = "Exhaustiveness check failed"): never {
+  throw new Error(`${message}: ${String(x)}`);
+}
 
 export type ExpenseCategory =
   | "Food"
@@ -19,155 +42,184 @@ export type ExpenseSource = "manual" | "event" | "installment" | "simulated";
 export type IncomeRecurrence = "once" | "weekly";
 
 export interface Income {
-  id: string;
-  label: string;
-  amount: Paise;
-  day: number;
-  recurrence: IncomeRecurrence;
+  readonly id: string;
+  readonly label: string;
+  readonly amount: Paise;
+  readonly day: number;
+  readonly recurrence: IncomeRecurrence;
 }
 
-export interface Expense {
-  id: string;
-  amount: Paise;
-  category: ExpenseCategory;
-  day: number;
-  note: string;
-  source: ExpenseSource;
+export interface BaseExpense {
+  readonly id: string;
+  readonly amount: Paise;
+  readonly category: ExpenseCategory;
+  readonly day: number;
+  readonly note: string;
 }
+
+export interface ManualExpense extends BaseExpense {
+  readonly source: "manual";
+}
+
+export interface EventExpense extends BaseExpense {
+  readonly source: "event";
+}
+
+export interface InstallmentExpense extends BaseExpense {
+  readonly source: "installment";
+}
+
+export interface SimulatedExpense extends BaseExpense {
+  readonly source: "simulated";
+}
+
+export type Expense =
+  | ManualExpense
+  | EventExpense
+  | InstallmentExpense
+  | SimulatedExpense;
 
 export interface Commitment {
-  id: string;
-  label: string;
-  amount: Paise;
-  dueDay: number;
-  paidEarly: boolean;
+  readonly id: string;
+  readonly label: string;
+  readonly amount: Paise;
+  readonly dueDay: number;
+  readonly paidEarly: boolean;
 }
 
 export interface Subscription {
-  id: string;
-  name: string;
-  monthlyAmount: Paise;
-  renewalDay: number;
-  active: boolean;
+  readonly id: string;
+  readonly name: string;
+  readonly monthlyAmount: Paise;
+  readonly renewalDay: number;
+  readonly active: boolean;
 }
 
 export interface Goal {
-  id: string;
-  name: string;
-  emoji: string;
-  target: Paise;
-  initialSaved: Paise;
-  deadlineDay: number; // May exceed 30
+  readonly id: string;
+  readonly name: string;
+  readonly emoji: string;
+  readonly target: Paise;
+  readonly initialSaved: Paise;
+  readonly deadlineDay: number; // May exceed 30
 }
 
 export interface Transfer {
-  id: string;
-  goalId: string;
-  amount: Paise; // positive = into goal, negative = borrowed back
-  day: number;
+  readonly id: string;
+  readonly goalId: string;
+  readonly amount: Paise; // positive = into goal, negative = borrowed back
+  readonly day: number;
 }
 
-export type EventResolutionChoice = "pay_now" | "split_installments" | "borrow_goal" | "skip";
+export type EventResolutionChoice =
+  | "pay_now"
+  | "split_installments"
+  | "borrow_goal"
+  | "skip";
 
 export interface UnexpectedEvent {
-  id: string;
-  title: string;
-  amount: Paise;
-  day: number;
-  status: "pending" | "resolved";
-  resolution?: EventResolutionChoice;
-  resurfaceDay?: number;
+  readonly id: string;
+  readonly title: string;
+  readonly amount: Paise;
+  readonly day: number;
+  readonly status: "pending" | "resolved";
+  readonly resolution?: EventResolutionChoice;
+  readonly resurfaceDay?: number;
 }
 
 export interface Config {
-  startBalance: Paise;
-  totalDays: number;
+  readonly startBalance: Paise;
+  readonly totalDays: number;
 }
 
 export interface Meta {
-  onboarded: boolean;
-  rngSeed: number;
-  currentDay: number;
-  schemaVersion: number;
+  readonly onboarded: boolean;
+  readonly rngSeed: number;
+  readonly currentDay: number;
+  readonly schemaVersion: number;
 }
 
 export interface FinanceState {
   config: Config;
   meta: Meta;
-  incomes: Income[];
-  expenses: Expense[];
-  commitments: Commitment[];
-  subscriptions: Subscription[];
-  goals: Goal[];
-  transfers: Transfer[];
-  unexpectedEvents: UnexpectedEvent[];
+  incomes: readonly Income[];
+  expenses: readonly Expense[];
+  commitments: readonly Commitment[];
+  subscriptions: readonly Subscription[];
+  goals: readonly Goal[];
+  transfers: readonly Transfer[];
+  unexpectedEvents: readonly UnexpectedEvent[];
 }
+
+export type AppState = FinanceState;
 
 export type RiskLevel = "Critical" | "Danger" | "Watch" | "Safe";
 
 export interface RiskAnalysis {
-  level: RiskLevel;
-  reasons: string[];
+  readonly level: RiskLevel;
+  readonly reasons: readonly string[];
 }
+
+export type RiskAssessment = RiskAnalysis;
 
 export type HealthMood = "Thriving" | "Surviving" | "Wobbly" | "Cooked";
 
 export interface HealthFactorBreakdown {
-  runway: number; // weight 30
-  savingsProgress: number; // weight 20
-  commitmentRatio: number; // weight 15
-  spendingDiscipline: number; // weight 15
-  subscriptionLoad: number; // weight 10
-  emergencyBuffer: number; // weight 10
+  readonly runway: number; // weight 30
+  readonly savingsProgress: number; // weight 20
+  readonly commitmentRatio: number; // weight 15
+  readonly spendingDiscipline: number; // weight 15
+  readonly subscriptionLoad: number; // weight 10
+  readonly emergencyBuffer: number; // weight 10
 }
 
 export interface HealthScoreResult {
-  score: number; // 0..100
-  mood: HealthMood;
-  factors: HealthFactorBreakdown;
-  tips: string[];
+  readonly score: number; // 0..100
+  readonly mood: HealthMood;
+  readonly factors: HealthFactorBreakdown;
+  readonly tips: readonly string[];
 }
 
 export interface GoalEtaResult {
-  goalId: string;
-  target: Paise;
-  saved: Paise;
-  remaining: Paise;
-  requiredDailySaving: Paise;
-  progressRatio: number;
-  etaDay: number | null; // null if unreachable
+  readonly goalId: string;
+  readonly target: Paise;
+  readonly saved: Paise;
+  readonly remaining: Paise;
+  readonly requiredDailySaving: Paise;
+  readonly progressRatio: number;
+  readonly etaDay: number | null; // null if unreachable
 }
 
 export interface SubscriptionCancellationOpportunity {
-  subscriptionId: string;
-  name: string;
-  monthlySavings: Paise;
-  annualSavings: Paise;
-  allowanceGain: Paise;
+  readonly subscriptionId: string;
+  readonly name: string;
+  readonly monthlySavings: Paise;
+  readonly annualSavings: Paise;
+  readonly allowanceGain: Paise;
 }
 
 export interface SubscriptionAnalytics {
-  monthlyTotal: Paise;
-  annualTotal: Paise;
-  percentageOfStart: number;
-  cancellationOpportunities: SubscriptionCancellationOpportunity[];
+  readonly monthlyTotal: Paise;
+  readonly annualTotal: Paise;
+  readonly percentageOfStart: number;
+  readonly cancellationOpportunities: readonly SubscriptionCancellationOpportunity[];
 }
 
 export interface Snapshot {
-  balance: Paise;
-  upcomingObligations: Paise;
-  goalReserve: Paise;
-  dailyAllowance: Paise;
-  overspentBy: Paise;
-  burnRate: Paise;
-  monthEndForecast: Paise;
-  daysUntilZero: number | null;
-  risk: RiskAnalysis;
-  health: HealthScoreResult;
-  goalEtas: Record<string, GoalEtaResult>;
-  subscriptionsAnalytics: SubscriptionAnalytics;
-  currentDay: number;
-  daysLeft: number;
+  readonly balance: Paise;
+  readonly upcomingObligations: Paise;
+  readonly goalReserve: Paise;
+  readonly dailyAllowance: Paise;
+  readonly overspentBy: Paise;
+  readonly burnRate: Paise;
+  readonly monthEndForecast: Paise;
+  readonly daysUntilZero: number | null;
+  readonly risk: RiskAnalysis;
+  readonly health: HealthScoreResult;
+  readonly goalEtas: Readonly<Record<string, GoalEtaResult>>;
+  readonly subscriptionsAnalytics: SubscriptionAnalytics;
+  readonly currentDay: number;
+  readonly daysLeft: number;
 }
 
 export type SimulationVerdict = "GO FOR IT" | "THINK TWICE" | "HARD NO";
@@ -175,32 +227,32 @@ export type SimulationVerdict = "GO FOR IT" | "THINK TWICE" | "HARD NO";
 export type DecisionRecurrence = "once" | "weekly" | "monthly";
 
 export interface DecisionInput {
-  name: string;
-  amount: Paise;
-  recurrence: DecisionRecurrence;
-  day?: number;
+  readonly name: string;
+  readonly amount: Paise;
+  readonly recurrence: DecisionRecurrence;
+  readonly day?: number;
 }
 
 export interface SnapshotDelta {
-  balance: Paise;
-  dailyAllowance: Paise;
-  monthEndForecast: Paise;
-  healthScore: number;
-  riskChanged: boolean;
+  readonly balance: Paise;
+  readonly dailyAllowance: Paise;
+  readonly monthEndForecast: Paise;
+  readonly healthScore: number;
+  readonly riskChanged: boolean;
 }
 
 export interface SimulationResult {
-  before: Snapshot;
-  after: Snapshot;
-  delta: SnapshotDelta;
-  verdict: SimulationVerdict;
-  reasons: string[];
-  monthlyCost?: Paise;
-  annualizedCost?: Paise;
+  readonly before: Snapshot;
+  readonly after: Snapshot;
+  readonly delta: SnapshotDelta;
+  readonly verdict: SimulationVerdict;
+  readonly reasons: readonly string[];
+  readonly monthlyCost?: Paise;
+  readonly annualizedCost?: Paise;
 }
 
 export interface CatalogEvent {
-  title: string;
-  amountRupees: number;
-  description: string;
+  readonly title: string;
+  readonly amountRupees: number;
+  readonly description: string;
 }

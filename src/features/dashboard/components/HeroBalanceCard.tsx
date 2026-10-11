@@ -95,7 +95,7 @@ export const HeroBalanceCard: React.FC<HeroBalanceCardProps> = ({
             <Zap className="w-3.5 h-3.5 text-warning" /><span>Trigger surprise</span>
           </Button>
           <Button size="sm" variant="primary" onClick={onAddExpense} className="gap-1.5 text-xs min-h-[38px]">
-            <span>+ Add expense</span>
+            <span>+ Quick Add</span>
           </Button>
         </div>
       </div>

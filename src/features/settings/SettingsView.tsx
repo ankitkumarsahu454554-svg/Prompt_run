@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Award, Shield } from "lucide-react";
+import { Award } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { useFinanceStore } from "../../store/financeStore";
@@ -10,6 +10,7 @@ import { ThemeSettingsCard } from "./components/ThemeSettingsCard";
 import { SimulationControlsCard } from "./components/SimulationControlsCard";
 import { DataManagementCard } from "./components/DataManagementCard";
 import { MonthRecapModal } from "./components/MonthRecapModal";
+import { PrivacyGuaranteeCard } from "./components/PrivacyGuaranteeCard";
 
 export const SettingsView: React.FC = () => {
   const state = useFinanceStore((s) => s.state);
@@ -20,7 +21,7 @@ export const SettingsView: React.FC = () => {
   const advanceDay = useFinanceStore((s) => s.advanceDay);
 
   const snapshot = selectSnapshot(state);
-  const { currentDay, balance, health } = snapshot;
+  const { currentDay } = snapshot;
 
   const [importText, setImportText] = React.useState("");
   const [importStatus, setImportStatus] = React.useState<{ success?: boolean; message?: string } | null>(null);
@@ -116,23 +117,12 @@ export const SettingsView: React.FC = () => {
         onImportSubmit={handleImportSubmit}
       />
 
-      <Card className="p-4 border-border/80 bg-elevated/30">
-        <div className="flex items-start gap-3">
-          <Shield className="h-5 w-5 text-success shrink-0 mt-0.5" aria-hidden="true" />
-          <div className="space-y-1 text-xs text-muted">
-            <span className="font-semibold text-text">Zero-Telemetry Privacy Guarantee</span>
-            <p>
-              Broke But Functional operates 100% in your browser. No external telemetry, no cloud servers, zero analytics trackers, and zero network calls. All financial numbers remain strictly confidential on your local device.
-            </p>
-          </div>
-        </div>
-      </Card>
+      <PrivacyGuaranteeCard />
 
       <MonthRecapModal
         open={showRecap}
         onOpenChange={setShowRecap}
-        balance={balance}
-        healthScore={health.score}
+        state={state}
       />
     </div>
   );

@@ -27,6 +27,12 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Architecture Boundary Verification (Dependency Cruiser)
+        run: npm run check:arch
+
+      - name: Code Duplication Check (jscpd < 3%)
+        run: npm run check:dups
+
       - name: Static Type Check
         run: npm run typecheck
 
@@ -50,6 +56,9 @@ jobs:
 
       - name: Run End-to-End & Axe A11y Tests
         run: npm run test:e2e
+
+      - name: Run Lighthouse CI Budgets
+        run: npx -y @lhci/cli@0.14.x autorun
 
       - name: Upload Test Results
         if: always()

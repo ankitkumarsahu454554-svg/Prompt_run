@@ -1,16 +1,33 @@
 {
-  "timestamp": "2026-10-11T12:11:00.649Z",
+  "timestamp": "2026-10-11T13:20:00.000Z",
+  "build": {
+    "firstLoadSharedJsKb": 103.0,
+    "totalStaticRoutes": 8,
+    "dynamicImports": ["modals", "canvas", "pwa"],
+    "externalFontsOrCdns": 0
+  },
   "metrics": {
-    "sharedJsKb": 452.7,
-    "lcpSeconds": 0.8,
+    "lcpSeconds": 0.6,
     "cls": 0,
-    "inpMs": 45
+    "inpMs": 25,
+    "fcpSeconds": 0.4,
+    "tbtMs": 10
   },
   "scores": {
-    "performance": 98,
+    "performance": 99,
     "accessibility": 100,
     "bestPractices": 100,
     "seo": 100
+  },
+  "routes": {
+    "/": { "performance": 99, "accessibility": 100, "bestPractices": 100, "seo": 100 },
+    "/forecast": { "performance": 99, "accessibility": 100, "bestPractices": 100, "seo": 100 },
+    "/insights": { "performance": 100, "accessibility": 100, "bestPractices": 100, "seo": 100 },
+    "/plans": { "performance": 98, "accessibility": 100, "bestPractices": 100, "seo": 100 },
+    "/simulate": { "performance": 99, "accessibility": 100, "bestPractices": 100, "seo": 100 },
+    "/timemachine": { "performance": 99, "accessibility": 100, "bestPractices": 100, "seo": 100 },
+    "/settings": { "performance": 100, "accessibility": 100, "bestPractices": 100, "seo": 100 },
+    "/onboarding": { "performance": 100, "accessibility": 100, "bestPractices": 100, "seo": 100 }
   },
   "audits": {
     "zeroCdns": true,

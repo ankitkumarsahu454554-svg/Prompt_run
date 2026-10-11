@@ -2,9 +2,7 @@
 
 import * as React from "react";
 import { Plus } from "lucide-react";
-import { asPaise } from "../../domain/money";
 import type { ExpenseCategory } from "../../domain/types";
-import { formatPaise } from "../../lib/format";
 import { parseAmount, sanitizeText } from "../../lib/sanitize";
 import { calculateDailyAllowance } from "../../domain/engine/allowance";
 import { useFinanceStore } from "../../store/financeStore";
@@ -12,6 +10,7 @@ import { Button } from "../../components/ui/Button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../../components/ui/Dialog";
 import { Input } from "../../components/ui/Input";
 import { CategoryRadioGroup } from "./components/CategoryRadioGroup";
+import { AllowancePreviewBox } from "./components/AllowancePreviewBox";
 
 export interface AddExpenseModalProps {
   open?: boolean;
@@ -44,10 +43,7 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
   if (parsedAmount && parsedAmount > 0) {
     const virtualState = {
       ...state,
-      expenses: [
-        ...state.expenses,
-        { id: "temp", amount: parsedAmount, category, day: state.meta.currentDay, note: "", source: "manual" as const },
-      ],
+      expenses: [...state.expenses, { id: "temp", amount: parsedAmount, category, day: state.meta.currentDay, note: "", source: "manual" as const }],
     };
     previewAllowance = calculateDailyAllowance(virtualState).dailyAllowance;
     allowanceDelta = previewAllowance - currentAllowance;
@@ -58,37 +54,22 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
     setError(null);
     const amountPaise = parseAmount(amountInput);
     if (!amountPaise) {
-      setError("Please enter a valid amount in Rupees (e.g. 150 or 250.50).");
+      setError("Please enter a valid amount (e.g. 150 or 49.50)");
       return;
     }
-
-    addExpense({
-      amount: amountPaise,
-      category,
-      day: state.meta.currentDay,
-      note: sanitizeText(note, 120),
-      source: "manual",
-    });
-
+    addExpense({ amount: amountPaise, category, note: sanitizeText(note), day: state.meta.currentDay, source: "manual" });
     setAmountInput("");
     setNote("");
-    setCategory("Food");
     setIsOpen(false);
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      {trigger ? (
-        <DialogTrigger asChild>{trigger}</DialogTrigger>
-      ) : (
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
+      {!trigger && controlledOpen === undefined && (
         <DialogTrigger asChild>
-          <Button
-            size="lg"
-            className="fixed bottom-20 right-6 lg:bottom-8 lg:right-8 z-30 shadow-xl rounded-full gap-2 px-5 min-h-[52px]"
-            aria-label="Quick Add"
-          >
-            <Plus className="w-5 h-5" aria-hidden="true" />
-            <span className="font-semibold">Quick Add</span>
+          <Button variant="primary" size="md" className="gap-2 shadow-lg shadow-primary/20">
+            <Plus className="w-4 h-4" /> Add Expense
           </Button>
         </DialogTrigger>
       )}
@@ -96,9 +77,7 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
       <DialogContent sheet>
         <DialogHeader>
           <DialogTitle>Add Expense</DialogTitle>
-          <DialogDescription>
-            Record spending for Day {state.meta.currentDay}. See instant consequences on your daily allowance.
-          </DialogDescription>
+          <DialogDescription>Record spending for Day {state.meta.currentDay}. See instant consequences on your daily allowance.</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5 text-left">
@@ -113,10 +92,7 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
                 autoFocus
                 placeholder="0.00"
                 value={amountInput}
-                onChange={(e) => {
-                  setAmountInput(e.target.value);
-                  if (error) setError(null);
-                }}
+                onChange={(e) => { setAmountInput(e.target.value); if (error) setError(null); }}
                 className="w-full min-h-[52px] pl-8 pr-4 text-2xl font-bold font-heading rounded-input bg-elevated border border-border text-text placeholder:text-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-text tabular-nums"
                 aria-describedby={error ? "expense-amount-error" : "allowance-preview"}
                 aria-invalid={error ? "true" : undefined}
@@ -126,22 +102,16 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
           </div>
 
           {parsedAmount && parsedAmount > 0 && (
-            <div id="allowance-preview" aria-live="polite" className="p-3 rounded-input bg-elevated/70 border border-border text-xs flex items-center justify-between">
-              <span className="text-muted">Daily allowance after this:</span>
-              <div className="flex items-center gap-1.5">
-                <span className="font-bold text-text tabular-nums">{formatPaise(previewAllowance)}/day</span>
-                <span className="text-danger font-semibold tabular-nums">(▼ {formatPaise(asPaise(Math.abs(allowanceDelta)))})</span>
-              </div>
-            </div>
+            <AllowancePreviewBox previewAllowance={previewAllowance} allowanceDelta={allowanceDelta} />
           )}
 
           <CategoryRadioGroup category={category} setCategory={setCategory} />
 
           <Input label="Note (Optional)" placeholder="e.g. Chai at tapri, Swiggy biryani" value={note} onChange={(e) => setNote(e.target.value)} maxLength={120} hint="Max 120 characters" />
 
-          <div className="pt-2 flex items-center justify-end gap-3">
-            <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-            <Button type="submit" variant="primary" className="px-6">Add Expense</Button>
+          <div className="flex gap-3 pt-2">
+            <Button type="button" variant="outline" className="flex-1" onClick={() => setIsOpen(false)}>Cancel</Button>
+            <Button type="submit" variant="primary" className="flex-1">Add Expense</Button>
           </div>
         </form>
       </DialogContent>

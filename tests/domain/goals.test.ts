@@ -90,7 +90,8 @@ describe("calculateGoalReserve & Goal ETAs", () => {
 
   it("handles completed goals where remaining <= 0", () => {
     const state = createBaseState(10);
-    state.goals[0]!.initialSaved = state.goals[0]!.target; // already 100% saved
+    const completedGoal = { ...state.goals[0]!, initialSaved: state.goals[0]!.target };
+    state.goals = [completedGoal];
     const etas = calculateGoalEtas(state, rupeesToPaise(2000));
     expect(etas["goal-1"]?.etaDay).toBe(10); // completed today
     expect(etas["goal-1"]?.progressRatio).toBe(1);

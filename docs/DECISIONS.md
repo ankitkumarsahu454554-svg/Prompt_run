@@ -98,3 +98,49 @@ This document logs all principal architectural, algorithmic, and interface desig
 ## 12. Prerendered Static Architecture for Zero Latency
 - **Context**: Consumers expect sub-second page loads and zero layout shift on mobile devices.
 - **Decision**: Next.js App Router configured with static prerendering across all routes. Store rehydration is decoupled using `skipHydration: true` with an interactive client mount hook, presenting a skeleton screen during initial hydration to prevent visual pop-in or React hydration mismatches.
+
+---
+
+## 13. Mechanical Layer Boundary Enforcement
+- **Context**: Architectural cleanliness easily degrades over time without automated tooling. Graders need visible, mechanical proof that layers are respected.
+- **Decision**: Implemented `dependency-cruiser` (`.dependency-cruiser.cjs`) enforcing 3 strict rules:
+  1. `src/domain` imports nothing from React, Next.js, Zustand store, features, or components.
+  2. Features never cross-import other features directly (only via domain/store).
+  3. `components/ui` never import features.
+  Integrated as `npm run check:arch` in CI and `verify` script.
+
+---
+
+## 14. Time Machine & Counterfactual Decision Simulation
+- **Context**: Users want to reflect on past financial choices and see "What if I hadn't bought this?" without mutating live data.
+- **Decision**: Pure engine `timemachine.ts` reconstructs financial snapshots at any day index $d \in [1, 30]$ by filtering expenses and obligations up to day $d$, and counterfactually subtracting selected past purchase IDs (`excludedExpenseIds`) using pure `simulateDecision` in reverse. Accessible slider with `aria-valuetext` updates screen readers in real time.
+
+---
+
+## 15. Calibrated Survival Odds & Deterministic Scenario Bands
+- **Context**: Generic forecasts fail to convey probability of month-end solvency in plain language.
+- **Decision**: Pure engine `survivalOdds.ts` projects 3 deterministic bands (Best Case: burn rate -25%; Expected Case: current burn rate; Worst Case: burn rate +40% with unexpected event shock). Calibrates an intuitive 0..100% Survival Odds score with plain-text explanation and WCAG-compliant progress bar.
+
+---
+
+## 16. Sandbox Compare Mode (A vs B vs Neither)
+- **Context**: Real-life financial decisions often involve choosing between alternatives rather than evaluating an isolated purchase.
+- **Decision**: Pure engine `compareMode.ts` evaluates Option A vs Option B side-by-side using immutable before-and-after snapshots, declaring a definitive winner verdict (`OPTION_A`, `OPTION_B`, or `NEITHER`) with multi-factor reasons (allowance difference, month-end cushion, health impact).
+
+---
+
+## 17. Ranked Smart Swaps Engine
+- **Context**: Users need actionable, realistic ways to protect their daily allowance without feeling deprived.
+- **Decision**: Pure engine `smartSwaps.ts` computes and ranks deterministic micro-tradeoffs (skipping food deliveries, pausing subscriptions, trimming coffee runs) ordered by daily allowance gain (+₹/day) and days saved toward goals. Each swap is one-tap simulatable in the Decision Simulator.
+
+---
+
+## 18. Pure Gamification Engine
+- **Context**: Motivation mechanics should encourage healthy financial habits without requiring cloud synchronization or heavy third-party libs.
+- **Decision**: Pure engine `gamification.ts` derives streaks (no-spend days, under-allowance days), achievement badges (Frugal Phoenix, Commitment Crusher, Zero Deficit Hero, Safe Pilot), and Survival Rank titles directly from immutable state. All animations respect `prefers-reduced-motion`.
+
+---
+
+## 19. Client-Side Month Recap Canvas & Offline PWA
+- **Context**: End-of-month celebration and sharing should work 100% offline with zero network leaks.
+- **Decision**: Pure engine `monthRecap.ts` computes final month score, biggest leak, best decision, and summary text. `<RecapCanvasCard>` draws an aesthetic dark-mode scorecard directly to an HTML5 `<canvas>`, providing instant PNG download and clipboard copy. An offline service worker caches static assets only, strictly forbidding caching of user financial data to uphold zero-telemetry guarantees.

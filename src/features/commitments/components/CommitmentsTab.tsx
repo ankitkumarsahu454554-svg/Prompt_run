@@ -11,7 +11,7 @@ import { formatPaise } from "../../../lib/format";
 import { parseAmount, sanitizeText } from "../../../lib/sanitize";
 
 interface CommitmentsTabProps {
-  commitments: Commitment[];
+  commitments: readonly Commitment[];
   currentDay: number;
   onTogglePaidEarly: (id: string) => void;
   onAddCommitment: (com: Omit<Commitment, "id">) => void;

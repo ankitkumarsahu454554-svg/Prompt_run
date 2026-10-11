@@ -7,6 +7,7 @@ import { selectSnapshot } from "../../store/selectors";
 import { SubscriptionsTab } from "./components/SubscriptionsTab";
 import { CommitmentsTab } from "./components/CommitmentsTab";
 import { GoalsTab } from "./components/GoalsTab";
+import { SmartSwapsCard } from "./components/SmartSwapsCard";
 
 export const PlansView: React.FC = () => {
   const state = useFinanceStore((s) => s.state);
@@ -29,6 +30,8 @@ export const PlansView: React.FC = () => {
           Track subscriptions drain, manage non-negotiable commitments, and hit your savings targets.
         </p>
       </div>
+
+      <SmartSwapsCard state={state} />
 
       <Tabs defaultValue="subscriptions" className="w-full">
         <TabsList className="grid grid-cols-3 w-full">
